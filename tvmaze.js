@@ -16,39 +16,24 @@ const searchFormTerm = $('#searchForm-term').val();
 async function getShowsByTerm(searchFormTerm) {
   // ADD: Remove placeholder & make request to TVMaze search shows API.
 
-  const response = await axios.get('http://api.tvmaze.com/search/shows', {params: {q: searchFormTerm}});
+  const response = await axios.get('http://api.tvmaze.com/search/shows',
+    { params: { q: searchFormTerm } });
   console.log(response);
 
-  let {id, name, summary, image } = response.data[0].show;
+  // let { id, name, summary, image } = response.data[0].show;
+  const shows = [];
+  const showsDataFromResponse = response.data;
 
-  if (image === undefined) {
-    image = "https://fastly.picsum.photos/id/662/200/300.jpg?hmac=jdGUtAdbjqLXAnuKsUBMfmHw-1uVMo7pgJZTdttSRb8";
-  } else {
-    image = image.medium;
+  for (const showAndScore of showsDataFromResponse) { //TODO: consider refactoring using map
+    const { id, name, summary } = showAndScore.show;
+    const image = showAndScore.show.image !== null
+      ? showAndScore.show.image.medium
+      : "https://tinyurl.com/tv-missing";
+
+    shows.push({ id, name, summary, image });
+    console.log("shows=", shows);
   }
-
-  console.log([{id, name, summary, image}])
-  return [{id, name, summary, image}];
-
-
-  // return [
-  //   {
-  //     id: 1767,
-  //     name: "The Bletchley Circle",
-  //     summary:
-  //       `<p><b>The Bletchley Circle</b> follows the journey of four ordinary
-  //          women with extraordinary skills that helped to end World War II.</p>
-  //        <p>Set in 1952, Susan, Millie, Lucy and Jean have returned to their
-  //          normal lives, modestly setting aside the part they played in
-  //          producing crucial intelligence, which helped the Allies to victory
-  //          and shortened the war. When Susan discovers a hidden code behind an
-  //          unsolved murder she is met by skepticism from the police. She
-  //          quickly realises she can only begin to crack the murders and bring
-  //          the culprit to justice with her former friends.</p>`,
-  //     image:
-  //         "http://static.tvmaze.com/uploads/images/medium_portrait/147/369403.jpg"
-  //   }
-  // ]
+  return shows;
 }
 
 
@@ -59,12 +44,9 @@ function populateShows(shows) {
 
   for (let show of shows) {
     const $show = $(
-        `<div data-show-id="${show.id}" class="Show col-md-12 col-lg-6 mb-4">
+      `<div data-show-id="${show.id}" class="Show col-md-12 col-lg-6 mb-4">
          <div class="media">
-           <img
-              src="http://static.tvmaze.com/uploads/images/medium_portrait/160/401704.jpg"
-              alt="Bletchly Circle San Francisco"
-              class="w-25 me-3">
+           <img src="${show.image}">
            <div class="media-body">
              <h5 class="text-primary">${show.name}</h5>
              <div><small>${show.summary}</small></div>
@@ -76,7 +58,8 @@ function populateShows(shows) {
        </div>
       `);
 
-    $showsList.append($show);  }
+    $showsList.append($show);
+  }
 }
 
 
