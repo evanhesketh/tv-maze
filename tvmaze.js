@@ -3,7 +3,7 @@
 const $showsList = $("#showsList");
 const $episodesArea = $("#episodesArea");
 const $searchForm = $("#searchForm");
-const searchFormTerm = $('#searchForm-term').val();
+// const searchFormTerm = $('#searchForm-term').val();
 const $episodesList = $('#episodesList');
 
 
@@ -15,13 +15,12 @@ const $episodesList = $('#episodesList');
  */
 
 async function getShowsByTerm(searchFormTerm) {
-  // ADD: Remove placeholder & make request to TVMaze search shows API.
+    // $searchForm.val(''); // global scope
 
   const response = await axios.get('http://api.tvmaze.com/search/shows',
     { params: { q: searchFormTerm } });
   console.log(response);
 
-  // let { id, name, summary, image } = response.data[0].show;
   const shows = [];
   const showsDataFromResponse = response.data;
 
@@ -87,11 +86,10 @@ $searchForm.on("submit", async function (evt) {
  */
 
 async function getEpisodesOfShow(id) {
-  const response = await axios.get(`http://api.tvmaze.com/shows/${id}/episodes`);
+  const response = await axios.get(`http://api.tvmaze.com/shows/${id}/episodes`); //make into base url global constant
   const responseData = response.data;
 
-  const episodes = responseData.map((episode) => {
-    const { id, name, season, number } = episode;
+  const episodes = responseData.map(({ id, name, season, number }) => {
     return { id, name, season, number };
   });
 
@@ -99,30 +97,38 @@ async function getEpisodesOfShow(id) {
   return episodes;
 }
 
-/** Write a clear docstring for this function... */
-
+/** populateEpisodes: makes episodes-area visibile
+ * appends each episode from passing in episodes array to the list
+ * in episodes-list
+ */
+//empty, fill, show
 function populateEpisodes(episodes) {
-  $episodesArea.css('display', 'block');
-
+  $episodesArea.css('display', 'block'); //use .show()
+//empty current list
   console.log("episodes=", episodes);
   //populate the #episodesList with the array of episodes
-  for (let episode of episodes) {
-    $episodesList.append($(`<li>
-    name: ${episode.name},
-    season: ${episode.season},
-    number: ${episode.number}
-    </li>`));
+  for (const episode of episodes) {
+    $episodesList.append(
+      $(`<li>
+        name: ${episode.name},
+        season: ${episode.season},
+        number: ${episode.number}
+      </li>`));
   }
 }
 
-function callGetEpisodesAndAppendToDom() {
+/** handleClickOnEpisodes: retrieves show ID from relevent show
+ * calls getEpisodesOfShow to retrieve an array of episodes
+ * calls populateEpisodes, passing in the return episodes array
+ */
+async function handleClickOnEpisodes(evt) {
+  const id = $(evt.target).closest('.Show').data("show-id");
+  console.log('id, ', id);
 
-  console.log($('data-show-id').data());
-
-  // getEpisodesOfShow(id);
-  // populateEpisodes(episodes);
+  const episodes = await getEpisodesOfShow(id);
+  populateEpisodes(episodes);
 }
 
-$('.Show-getEpisodes').on('click',)
-
+$showsList.on('click', 'button', handleClickOnEpisodes); // change button to more specific selector
+$('#searchForm-term').val('');
 
