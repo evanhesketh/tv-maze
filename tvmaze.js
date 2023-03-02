@@ -4,6 +4,7 @@ const $showsList = $("#showsList");
 const $episodesArea = $("#episodesArea");
 const $searchForm = $("#searchForm");
 const searchFormTerm = $('#searchForm-term').val();
+const $episodesList = $('#episodesList');
 
 
 /** Given a search term, search for tv shows that match that query.
@@ -90,14 +91,38 @@ async function getEpisodesOfShow(id) {
   const responseData = response.data;
 
   const episodes = responseData.map((episode) => {
-     const {id, name, season, number} = episode;
-    return {id, name, season, number};
+    const { id, name, season, number } = episode;
+    return { id, name, season, number };
   });
 
   console.log('episodes, ', episodes);
-
- }
+  return episodes;
+}
 
 /** Write a clear docstring for this function... */
 
-// function populateEpisodes(episodes) { }
+function populateEpisodes(episodes) {
+  $episodesArea.css('display', 'block');
+
+  console.log("episodes=", episodes);
+  //populate the #episodesList with the array of episodes
+  for (let episode of episodes) {
+    $episodesList.append($(`<li>
+    name: ${episode.name},
+    season: ${episode.season},
+    number: ${episode.number}
+    </li>`));
+  }
+}
+
+function callGetEpisodesAndAppendToDom() {
+
+  console.log($('data-show-id').data());
+
+  // getEpisodesOfShow(id);
+  // populateEpisodes(episodes);
+}
+
+$('.Show-getEpisodes').on('click',)
+
+
